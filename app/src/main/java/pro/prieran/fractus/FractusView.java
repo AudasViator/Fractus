@@ -7,12 +7,20 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.os.Build;
+import android.support.v4.util.Pair;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static java.lang.Math.atan2;
 import static java.lang.Math.cos;
@@ -54,7 +62,6 @@ public class FractusView extends View {
         init();
     }
 
-
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         float x = event.getX();
@@ -90,17 +97,67 @@ public class FractusView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         for (Path path : paths) {
-            canvas.drawPath(path, paint);
+            if (path != null) {
+                canvas.drawPath(path, paint);
+            }
         }
     }
 
     private void init() {
         paint = new Paint();
+        paint.setStrokeWidth(2);
         paint.setStyle(Paint.Style.STROKE);
     }
 
-    private List<PointF> iterateIt(List<PointF> originalCurve, List<PointF> currentCurve) {
-        List<PointF> newCurve = new ArrayList<>();
+    private List<PointF> iterateIt(final List<PointF> originalCurve, final List<PointF> currentCurve) {
+        final List<PointF> newCurve = new ArrayList<>();
+        final List<Pair<Integer, List<PointF>>> tempCurve = new CopyOnWriteArrayList<>();
+
+        final int nThreads = Runtime.getRuntime().availableProcessors();
+        final int step = 400;
+        final ExecutorService executorService = Executors.newFixedThreadPool(nThreads);
+        for (int n = 0; n <= currentCurve.size() / step; n++) {
+            final int finalN = n;
+            executorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    final long before = System.currentTimeMillis();
+                    int right = (finalN + 1) * step;
+                    if ((finalN + 1) * step >= currentCurve.size()) {
+                        right = currentCurve.size();
+                    }
+                    tempCurve.add(new Pair<>(finalN, twiceIt(originalCurve, currentCurve.subList(finalN * step, right))));
+                    final long after = System.currentTimeMillis();
+                    Log.d("TagToSearch", "From " + (finalN * step) + ", to " + String.valueOf(right) + ". " + currentCurve.size() + ", " + (after - before) / 1000 + "ms");
+                }
+            });
+        }
+
+        executorService.shutdown();
+
+        try {
+            executorService.awaitTermination(24, TimeUnit.HOURS);
+            Log.d("TagToSearch", "Termination");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        final List<Pair<Integer, List<PointF>>> tempTempCurve = new ArrayList<>();
+        tempTempCurve.addAll(tempCurve);
+        Collections.sort(tempTempCurve, new Comparator<Pair<Integer, List<PointF>>>() {
+            @Override
+            public int compare(Pair<Integer, List<PointF>> o1, Pair<Integer, List<PointF>> o2) {
+                return o1.first.compareTo(o2.first);
+            }
+        });
+        for (Pair<Integer, List<PointF>> integerListPair : tempTempCurve) {
+            newCurve.addAll(integerListPair.second);
+        }
+        return newCurve;
+    }
+
+    private List<PointF> twiceIt(final List<PointF> originalCurve, final List<PointF> currentCurve) {
+        final List<PointF> newCurve = new ArrayList<>();
 
         final PointF first = originalCurve.get(0);
         final float firstX = first.x;
@@ -109,6 +166,7 @@ public class FractusView extends View {
         final PointF last = originalCurve.get(originalCurve.size() - 1);
         final float lastX = last.x;
         final float lastY = last.y;
+
         for (int k = 1; k < currentCurve.size(); k++) {
             final PointF previous = currentCurve.get(k - 1);
             final float previousX = previous.x;
