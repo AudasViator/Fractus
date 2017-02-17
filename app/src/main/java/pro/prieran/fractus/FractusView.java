@@ -10,7 +10,6 @@ import android.os.Build;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,8 +21,8 @@ import static java.lang.Math.sin;
 import static java.lang.Math.sqrt;
 
 public class FractusView extends View {
-    private final List<PointF> points = new ArrayList<>();
     private final List<Path> paths = new ArrayList<>();
+    private List<PointF> points = new ArrayList<>();
 
     // TODO: Remove it
     private float xPrev;
@@ -99,38 +98,55 @@ public class FractusView extends View {
     }
 
     public void onDoButtonClick() {
+        paths.clear();
+        List<PointF> newAllPoints = new ArrayList<>();
         final PointF first = points.get(0);
         final float firstX = first.x;
         final float firstY = first.y;
 
-        final PointF second = points.get(1);
-        final float secondX = second.x;
-        final float secondY = second.y;
-
         final PointF last = points.get(points.size() - 1);
         final float lastX = last.x;
         final float lastY = last.y;
+        for (int k = 1; k < points.size(); k++) {
+            final PointF previous = points.get(k - 1);
+            final float previousX = previous.x;
+            final float previousY = previous.y;
 
-        float coef = (float) sqrt((pow((lastX - firstX), 2) + pow((lastY - firstY), 2)) / (pow((secondX - firstX), 2) + pow((secondY - firstY), 2)));
+            final PointF current = points.get(k);
+            final float currentX = current.x;
+            final float currentY = current.y;
 
-        double angle = atan2(secondY - firstY, secondX - firstX) - atan2(lastY - firstY, lastX - firstX);
-        Toast.makeText(getContext(), coef + " " + (-angle * 57.2958), Toast.LENGTH_SHORT).show();
-        List<PointF> newPoints = new ArrayList<>();
-        for (int i = 0; i < points.size(); i++) {
-            PointF point = points.get(i);
-            PointF rotatedPoint = rotate(new PointF(point.x - firstX, point.y - firstY), angle);
-            PointF newPoint = new PointF(rotatedPoint.x / coef + firstX, rotatedPoint.y / coef + firstY);
-            newPoints.add(newPoint);
+            float coef = (float) sqrt((pow((lastX - firstX), 2) + pow((lastY - firstY), 2)) / (pow((currentX - previousX), 2) + pow((currentY - previousY), 2)));
+            double angle = atan2(currentY - previousY, currentX - previousX) - atan2(lastY - firstY, lastX - firstX);
+
+            List<PointF> newPoints = new ArrayList<>();
+            for (int i = 0; i < points.size(); i++) {
+                PointF point = points.get(i);
+                PointF rotatedPoint = rotate(new PointF(point.x - firstX, point.y - firstY), angle);
+                PointF newPoint = new PointF(rotatedPoint.x / coef + previousX, rotatedPoint.y / coef + previousY);
+                newPoints.add(newPoint);
+                newAllPoints.add(newPoint);
+            }
+
+            for (int i = 1; i < newPoints.size(); i++) {
+                PointF oldPoint = newPoints.get(i - 1);
+                PointF newPoint = newPoints.get(i);
+                final Path newPath = new Path();
+                newPath.moveTo(oldPoint.x, oldPoint.y);
+                newPath.lineTo(newPoint.x, newPoint.y);
+                paths.add(newPath);
+            }
         }
-        newPoints.size();
-        for (int i = 1; i < newPoints.size(); i++) {
-            PointF oldPoint = newPoints.get(i - 1);
-            PointF newPoint = newPoints.get(i);
-            final Path newPath = new Path();
-            newPath.moveTo(oldPoint.x, oldPoint.y);
-            newPath.lineTo(newPoint.x, newPoint.y);
-            paths.add(newPath);
-        }
+        invalidate();
+        points = newAllPoints;
+    }
+
+    public void onClearButtonClick() {
+        points.clear();
+        paths.clear();
+        path = null;
+        xPrev = 0;
+        yPrev = 0;
         invalidate();
     }
 

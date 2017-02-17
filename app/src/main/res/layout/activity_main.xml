@@ -12,10 +12,19 @@
         android:layout_height="match_parent" />
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/button_do"
         android:layout_width="140dp"
         android:layout_height="40dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:text="Do" />
+
+    <Button
+        android:id="@+id/button_clear"
+        android:layout_width="140dp"
+        android:layout_height="40dp"
+        android:layout_alignParentBottom="true"
+        android:layout_toLeftOf="@id/button_do"
+        android:text="Clear" />
+
 </RelativeLayout>

@@ -13,12 +13,19 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         final FractusView fractusView = (FractusView) findViewById(R.id.fractus_view);
-        final Button doButton = (Button) findViewById(R.id.button);
+        final Button doButton = (Button) findViewById(R.id.button_do);
+        final Button clearButton = (Button) findViewById(R.id.button_clear);
 
         doButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 fractusView.onDoButtonClick();
+            }
+        });
+        clearButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                fractusView.onClearButtonClick();
             }
         });
     }
