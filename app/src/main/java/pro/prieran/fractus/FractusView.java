@@ -24,6 +24,8 @@ public class FractusView extends View {
     private final List<Path> paths = new ArrayList<>();
     private List<PointF> points = new ArrayList<>();
 
+    private List<PointF> originalCurve = null;
+
     // TODO: Remove it
     private float xPrev;
     private float yPrev;
@@ -97,22 +99,22 @@ public class FractusView extends View {
         paint.setStyle(Paint.Style.STROKE);
     }
 
-    public void onDoButtonClick() {
-        paths.clear();
-        List<PointF> newAllPoints = new ArrayList<>();
-        final PointF first = points.get(0);
+    private List<PointF> iterateIt(List<PointF> originalCurve, List<PointF> currentCurve) {
+        List<PointF> newCurve = new ArrayList<>();
+
+        final PointF first = originalCurve.get(0);
         final float firstX = first.x;
         final float firstY = first.y;
 
-        final PointF last = points.get(points.size() - 1);
+        final PointF last = originalCurve.get(originalCurve.size() - 1);
         final float lastX = last.x;
         final float lastY = last.y;
-        for (int k = 1; k < points.size(); k++) {
-            final PointF previous = points.get(k - 1);
+        for (int k = 1; k < currentCurve.size(); k++) {
+            final PointF previous = currentCurve.get(k - 1);
             final float previousX = previous.x;
             final float previousY = previous.y;
 
-            final PointF current = points.get(k);
+            final PointF current = currentCurve.get(k);
             final float currentX = current.x;
             final float currentY = current.y;
 
@@ -120,12 +122,12 @@ public class FractusView extends View {
             double angle = atan2(currentY - previousY, currentX - previousX) - atan2(lastY - firstY, lastX - firstX);
 
             List<PointF> newPoints = new ArrayList<>();
-            for (int i = 0; i < points.size(); i++) {
-                PointF point = points.get(i);
+            for (int i = 0; i < originalCurve.size(); i++) {
+                PointF point = originalCurve.get(i);
                 PointF rotatedPoint = rotate(new PointF(point.x - firstX, point.y - firstY), angle);
                 PointF newPoint = new PointF(rotatedPoint.x / coef + previousX, rotatedPoint.y / coef + previousY);
                 newPoints.add(newPoint);
-                newAllPoints.add(newPoint);
+                newCurve.add(newPoint);
             }
 
             for (int i = 1; i < newPoints.size(); i++) {
@@ -137,14 +139,33 @@ public class FractusView extends View {
                 paths.add(newPath);
             }
         }
+        return newCurve;
+    }
+
+    public void onDoButtonClick() {
+        paths.clear();
+
+        if (originalCurve == null) {
+            originalCurve = points;
+        }
+
+        points = iterateIt(originalCurve, points);
+        for (int i = 1; i < points.size(); i++) {
+            PointF oldPoint = points.get(i - 1);
+            PointF newPoint = points.get(i);
+            final Path newPath = new Path();
+            newPath.moveTo(oldPoint.x, oldPoint.y);
+            newPath.lineTo(newPoint.x, newPoint.y);
+            paths.add(newPath);
+        }
         invalidate();
-        points = newAllPoints;
     }
 
     public void onClearButtonClick() {
         points.clear();
         paths.clear();
         path = null;
+        originalCurve = null;
         xPrev = 0;
         yPrev = 0;
         invalidate();
