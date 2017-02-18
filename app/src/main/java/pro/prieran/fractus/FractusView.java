@@ -29,7 +29,7 @@ import static java.lang.Math.sin;
 import static java.lang.Math.sqrt;
 
 public class FractusView extends View {
-    private final List<Path> paths = new ArrayList<>();
+    private List<Path> paths = new ArrayList<>();
     private List<PointF> points = new ArrayList<>();
 
     private List<PointF> originalCurve = null;
@@ -110,7 +110,7 @@ public class FractusView extends View {
     }
 
     private List<PointF> iterateIt(final List<PointF> originalCurve, final List<PointF> currentCurve) {
-        final List<PointF> newCurve = new ArrayList<>();
+        final List<PointF> newCurve = new ArrayList<>(currentCurve.size() * originalCurve.size() + 1);
         final List<Pair<Integer, List<PointF>>> tempCurve = new CopyOnWriteArrayList<>();
 
         final int nThreads = Runtime.getRuntime().availableProcessors();
@@ -157,33 +157,23 @@ public class FractusView extends View {
     }
 
     private List<PointF> twiceIt(final List<PointF> originalCurve, final List<PointF> currentCurve) {
-        final List<PointF> newCurve = new ArrayList<>();
+        final List<PointF> newCurve = new ArrayList<>(currentCurve.size() * originalCurve.size() + 1);
 
         final PointF first = originalCurve.get(0);
-        final float firstX = first.x;
-        final float firstY = first.y;
-
         final PointF last = originalCurve.get(originalCurve.size() - 1);
-        final float lastX = last.x;
-        final float lastY = last.y;
 
         for (int k = 1; k < currentCurve.size(); k++) {
             final PointF previous = currentCurve.get(k - 1);
-            final float previousX = previous.x;
-            final float previousY = previous.y;
-
             final PointF current = currentCurve.get(k);
-            final float currentX = current.x;
-            final float currentY = current.y;
 
-            float coef = (float) sqrt((pow((lastX - firstX), 2) + pow((lastY - firstY), 2)) / (pow((currentX - previousX), 2) + pow((currentY - previousY), 2)));
-            double angle = atan2(currentY - previousY, currentX - previousX) - atan2(lastY - firstY, lastX - firstX);
+            float scaleFactor = (float) sqrt((pow((last.x - first.x), 2) + pow((last.y - first.y), 2)) / (pow((current.x - previous.x), 2) + pow((current.y - previous.y), 2)));
+            double angle = atan2(current.y - previous.y, current.x - previous.x) - atan2(last.y - first.y, last.x - first.x);
 
             List<PointF> newPoints = new ArrayList<>();
             for (int i = 0; i < originalCurve.size(); i++) {
                 PointF point = originalCurve.get(i);
-                PointF rotatedPoint = rotate(new PointF(point.x - firstX, point.y - firstY), angle);
-                PointF newPoint = new PointF(rotatedPoint.x / coef + previousX, rotatedPoint.y / coef + previousY);
+                PointF rotatedPoint = rotate(new PointF(point.x - first.x, point.y - first.y), angle);
+                PointF newPoint = new PointF(rotatedPoint.x / scaleFactor + previous.x, rotatedPoint.y / scaleFactor + previous.y);
                 newPoints.add(newPoint);
                 newCurve.add(newPoint);
             }
@@ -194,14 +184,13 @@ public class FractusView extends View {
                 final Path newPath = new Path();
                 newPath.moveTo(oldPoint.x, oldPoint.y);
                 newPath.lineTo(newPoint.x, newPoint.y);
-                paths.add(newPath);
             }
         }
         return newCurve;
     }
 
     public void onDoButtonClick() {
-        paths.clear();
+        paths = new ArrayList<>(points.size());
 
         if (originalCurve == null) {
             originalCurve = points;
