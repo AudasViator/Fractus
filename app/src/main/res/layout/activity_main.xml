@@ -1,30 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context="pro.prieran.fractus.MainActivity">
-
-    <pro.prieran.fractus.FractusView
-        android:id="@+id/fractus_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
 
     <Button
         android:id="@+id/button_do"
-        android:layout_width="140dp"
-        android:layout_height="40dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:text="Do" />
+        android:layout_width="0dp"
+        android:layout_height="64dp"
+        android:text="Do"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/button_clear"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/button_clear"
-        android:layout_width="140dp"
-        android:layout_height="40dp"
-        android:layout_alignParentBottom="true"
-        android:layout_toLeftOf="@id/button_do"
-        android:text="Clear" />
+        android:layout_width="0dp"
+        android:layout_height="64dp"
+        android:text="Clear"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/button_do" />
 
-</RelativeLayout>
+    <pro.prieran.fractus.FractusView
+        android:id="@+id/fractus_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/button_do"
+        app:layout_constraintDimensionRatio="1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <View
+        android:id="@+id/separator"
+        android:layout_width="0dp"
+        android:layout_height="2dp"
+        android:background="@color/colorAccent"
+        app:layout_constraintBottom_toTopOf="@id/fractus_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <pro.prieran.fractus.PatternView
+        android:id="@+id/pattern_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/separator"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</android.support.constraint.ConstraintLayout>

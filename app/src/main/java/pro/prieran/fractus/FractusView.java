@@ -2,6 +2,7 @@ package pro.prieran.fractus;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -18,9 +19,10 @@ public class FractusView extends View {
     private List<Path> paths = new ArrayList<>();
     private List<PointF> points = new ArrayList<>();
 
-    private List<PointF> originalCurve = null;
+    private List<PointF> patternPoints = null;
 
-    // TODO: Remove it
+    private Bitmap bitmap;
+
     private float xPrev;
     private float yPrev;
 
@@ -90,19 +92,19 @@ public class FractusView extends View {
     }
 
     private void init() {
+        // TODO: Screen size
+//        bitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ALPHA_8);
+
         paint = new Paint();
         paint.setStrokeWidth(2);
         paint.setStyle(Paint.Style.STROKE);
     }
 
-    public void onDoButtonClick() {
+    public void onDoButtonClick(List<PointF> patternPoints) {
+        this.patternPoints = patternPoints;
         paths = new ArrayList<>(points.size());
 
-        if (originalCurve == null) {
-            originalCurve = points;
-        }
-
-        points = new Twicer().iterateIt(originalCurve, points);
+        points = new Twicer().iterateIt(this.patternPoints, points);
         for (int i = 1; i < points.size(); i++) {
             PointF oldPoint = points.get(i - 1);
             PointF newPoint = points.get(i);
@@ -118,7 +120,7 @@ public class FractusView extends View {
         points.clear();
         paths.clear();
         path = null;
-        originalCurve = null;
+        patternPoints = null;
         xPrev = 0;
         yPrev = 0;
         invalidate();
