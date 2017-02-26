@@ -21,8 +21,18 @@
         android:layout_height="64dp"
         android:text="Clear"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/button_save"
         app:layout_constraintStart_toEndOf="@id/button_do" />
+
+
+    <Button
+        android:id="@+id/button_save"
+        android:layout_width="0dp"
+        android:layout_height="64dp"
+        android:text="Save"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/button_clear" />
 
     <pro.prieran.fractus.FractusView
         android:id="@+id/fractus_view"

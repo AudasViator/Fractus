@@ -15,11 +15,13 @@ public class MainActivity extends AppCompatActivity {
         final FractusView fractusView = (FractusView) findViewById(R.id.fractus_view);
         final Button doButton = (Button) findViewById(R.id.button_do);
         final Button clearButton = (Button) findViewById(R.id.button_clear);
+        final Button saveButton = (Button) findViewById(R.id.button_save);
 
         doButton.setOnClickListener(v -> fractusView.onDoButtonClick(patternView.getPatternPoints()));
         clearButton.setOnClickListener(v -> {
             fractusView.onClearButtonClick();
             patternView.onClearButtonClick();
         });
+        saveButton.setOnClickListener(v -> fractusView.onSaveButtonClick());
     }
 }

@@ -7,7 +7,6 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
@@ -57,12 +56,7 @@ public class Twicer {
 
         final List<Pair<Integer, List<PointF>>> tempTempCurve = new ArrayList<>();
         tempTempCurve.addAll(tempCurve);
-        Collections.sort(tempTempCurve, new Comparator<Pair<Integer, List<PointF>>>() {
-            @Override
-            public int compare(Pair<Integer, List<PointF>> o1, Pair<Integer, List<PointF>> o2) {
-                return o1.first.compareTo(o2.first);
-            }
-        });
+        Collections.sort(tempTempCurve, (o1, o2) -> o1.first.compareTo(o2.first));
         for (Pair<Integer, List<PointF>> integerListPair : tempTempCurve) {
             newCurve.addAll(integerListPair.second);
         }
